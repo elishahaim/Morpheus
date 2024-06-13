@@ -28,10 +28,11 @@ import morpheus._lib.stages as _stages
 from morpheus.cli.register_stage import register_stage
 from morpheus.config import Config
 from morpheus.config import PipelineModes
+from morpheus.config import auto_determine_bootstrap
 from morpheus.messages import MessageMeta
 from morpheus.pipeline.preallocator_mixin import PreallocatorMixin
 from morpheus.pipeline.single_output_source import SingleOutputSource
-from morpheus.pipeline.stream_pair import StreamPair
+from morpheus.pipeline.stage_schema import StageSchema
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,9 @@ class KafkaSourceStage(PreallocatorMixin, SingleOutputSource):
         if isinstance(auto_offset_reset, AutoOffsetReset):
             auto_offset_reset = auto_offset_reset.value
 
+        if (bootstrap_servers == "auto"):
+            bootstrap_servers = auto_determine_bootstrap()
+
         self._consumer_params = {
             'bootstrap.servers': bootstrap_servers,
             'group.id': group_id,
@@ -136,6 +140,9 @@ class KafkaSourceStage(PreallocatorMixin, SingleOutputSource):
 
     def supports_cpp_node(self):
         return True
+
+    def compute_schema(self, schema: StageSchema):
+        schema.output_schema.set_type(MessageMeta)
 
     def stop(self):
         """
@@ -229,7 +236,7 @@ class KafkaSourceStage(PreallocatorMixin, SingleOutputSource):
             if (consumer):
                 consumer.close()
 
-    def _build_source(self, builder: mrc.Builder) -> StreamPair:
+    def _build_source(self, builder: mrc.Builder) -> mrc.SegmentObject:
 
         if (self._build_cpp_node()):
             source = _stages.KafkaSourceStage(builder,
@@ -249,4 +256,4 @@ class KafkaSourceStage(PreallocatorMixin, SingleOutputSource):
         else:
             source = builder.make_source(self.unique_name, self._source_generator)
 
-        return source, MessageMeta
+        return source

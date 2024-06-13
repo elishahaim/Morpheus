@@ -19,38 +19,42 @@
 ### Set up Morpheus Dev Container
 
 If you don't already have the Morpheus Dev container, run the following to build it:
-```
+```bash
 ./docker/build_container_dev.sh
 ```
 
 Now run the container:
-```
+```bash
 ./docker/run_container_dev.sh
 ```
 
 Note that Morpheus containers are tagged by date. By default, `run_container_dev.sh` will try to use current date as tag. Therefore, if you are trying to run a container that was not built on the current date, you must set the `DOCKER_IMAGE_TAG` environment variable. For example,
-```
+```bash
 DOCKER_IMAGE_TAG=dev-221003 ./docker/run_container_dev.sh
 ```
 
 In the `/workspace` directory of the container, run the following to compile Morpheus:
-```
+```bash
 ./scripts/compile.sh
 ```
 
 Now install Morpheus:
-```
+```bash
 pip install -e /workspace
 ```
 
 Install additonal required dependencies:
-```
+```bash
 export CUDA_VER=11.8
-mamba env update -n morpheus --file docker/conda/environments/cuda${CUDA_VER}_examples.yml
+mamba install -n base -c conda-forge conda-merge
+conda run -n base --live-stream conda-merge docker/conda/environments/cuda${CUDA_VER}_dev.yml \
+  docker/conda/environments/cuda${CUDA_VER}_examples.yml > .tmp/merged.yml \
+  && mamba env update -n ${CONDA_DEFAULT_ENV} --file .tmp/merged.yml
 ```
 
+
 Fetch input data for benchmarks:
-```
+```bash
 ./examples/digital_fingerprinting/fetch_example_data.py all
 ```
 
@@ -58,12 +62,12 @@ Fetch input data for benchmarks:
 
 MLflow is used as the model repository where the trained DFP models will be published and used for inference by the pipelines. Run the following to start MLflow in a host terminal window (not container):
 
-```
+```bash
 # from root of Morpheus repo
 cd examples/digital_fingerprinting/production
 ```
 
-```
+```bash
 docker compose up mlflow
 ```
 
@@ -93,7 +97,7 @@ Morpheus pipeline configurations for each workflow are managed using [pipelines_
 
 When using the MRC SegmentModule in a pipeline, it will also require a module configuration which gets generated within the test. Additional information is included in the [Morpheus Pipeline with Modules](../../../../../docs/source/developer_guide/guides/6_digital_fingerprinting_reference.md#morpheus-pipeline-with-modules)
 
-To ensure the [file_to_df_loader.py](../../../../../morpheus/loaders/file_to_df_loader.py) utilizes the same type of downloading mechanism, set `MORPHEUS_FILE_DOWNLOAD_TYPE` environment variable with any one of given choices (`multiprocess`, `dask`, `dask thread`, `single thread`).
+To ensure the [file_to_df_loader.py](../../../../../morpheus/loaders/file_to_df_loader.py) utilizes the same type of downloading mechanism, set `MORPHEUS_FILE_DOWNLOAD_TYPE` environment variable with any one of given choices (`dask`, `dask thread`, `single thread`).
 
 ```
 export MORPHEUS_FILE_DOWNLOAD_TYPE=dask

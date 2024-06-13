@@ -129,13 +129,16 @@
                     "--model_max_batch_size=1024",
                     "--use_cpp=False",
                     "pipeline-ae",
+                    "--columns_file=morpheus/data/columns_ae_cloudtrail.txt",
                     "--userid_column_name=userIdentitysessionContextsessionIssueruserName",
                     "--userid_filter=user123",
+                    "--timestamp_column_name=event_dt",
                     "from-cloudtrail",
                     "--input_glob=models/datasets/validation-data/dfp-cloudtrail-*-input.csv",
                     "--max_files=200",
                     "train-ae",
                     "--train_data_glob=models/datasets/training-data/dfp-*.csv",
+                    "--source_stage_class=morpheus.stages.input.cloud_trail_source_stage.CloudTrailSourceStage",
                     "--seed=42",
                     "preprocess",
                     "inf-pytorch",
@@ -562,37 +565,36 @@
                 "type": "cppdbg"
             },
             {
-				"name": "Python: GNN DGL inference",
-				"type": "python",
-				"request": "launch",
-				"program": "${workspaceFolder}/examples/gnn_fraud_detection_pipeline/run.py",
-				"console": "integratedTerminal",
-				"cwd": "${workspaceFolder}/examples/gnn_fraud_detection_pipeline",
-				"justMyCode": false,
-				"args": [
-					"--input_file=validation.csv",
-					"--training_file=training.csv",
-					"--output_file=result.csv",
-					"--model_dir=model"
-				]
-			},
-				{
-					"name": "Python: GNN model training",
-					"type": "python",
-					"request": "launch",
-					"program": "${workspaceFolder}/models/training-tuning-scripts/fraud-detection-models/training.py",
-					"console": "integratedTerminal",
-					"cwd": "${workspaceFolder}/models/training-tuning-scripts/fraud-detection-models",
-					"justMyCode": false,
-					"args": [
-						"--training-data=${workspaceFolder}/examples/gnn_fraud_detection_pipeline/training.csv",
-						"--validation-data=${workspaceFolder}/examples/gnn_fraud_detection_pipeline/validation.csv",
-						"--output-file=result.csv",
-						"--model-dir=models",
-						"--epochs=5"
-					]
-				}
-    
+                "name": "Python: GNN DGL inference",
+                "type": "python",
+                "request": "launch",
+                "program": "${workspaceFolder}/examples/gnn_fraud_detection_pipeline/run.py",
+                "console": "integratedTerminal",
+                "cwd": "${workspaceFolder}/examples/gnn_fraud_detection_pipeline",
+                "justMyCode": false,
+                "args": [
+                    "--input_file=validation.csv",
+                    "--training_file=training.csv",
+                    "--output_file=result.csv",
+                    "--model_dir=model"
+                ]
+            },
+            {
+                "name": "Python: GNN model training",
+                "type": "python",
+                "request": "launch",
+                "program": "${workspaceFolder}/models/training-tuning-scripts/fraud-detection-models/training.py",
+                "console": "integratedTerminal",
+                "cwd": "${workspaceFolder}/models/training-tuning-scripts/fraud-detection-models",
+                "justMyCode": false,
+                "args": [
+                    "--training-data=${workspaceFolder}/examples/gnn_fraud_detection_pipeline/training.csv",
+                    "--validation-data=${workspaceFolder}/examples/gnn_fraud_detection_pipeline/validation.csv",
+                    "--output-file=result.csv",
+                    "--model-dir=models",
+                    "--epochs=5"
+                ]
+            }
         ]
     },
     "settings": {
